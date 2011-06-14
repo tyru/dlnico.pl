@@ -157,6 +157,19 @@ GetOptions(
 usage if $needhelp;
 usage unless @ARGV;
 if (!defined $email || !defined $password) {
+    if (eval { require Config::Pit }) {
+        my $c = Config::Pit::pit_get(
+            'www.nicovideo.jp',
+            require => {
+                email    => 'your email (as ID)',
+                password => 'your password',
+            }
+        );
+        $email    //= $c->{email};
+        $password //= $c->{password};
+    }
+}
+if (!defined $email || !defined $password) {
     die "--email and --password are required.\n";
 }
 
