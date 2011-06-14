@@ -151,6 +151,7 @@ GetOptions(
     'email=s' => \$email,
     'password=s' => \$password,
     'progressbar' => \$progressbar,
+    'q|quiet' => sub { $DEBUG_LEVEL-- },
     'v|verbose' => sub { $DEBUG_LEVEL++ },
 ) or usage;
 usage if $needhelp;
