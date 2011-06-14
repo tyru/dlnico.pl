@@ -45,14 +45,14 @@ sub get_videos_from_mylist {
 
     my $feed_uri = get_feed_from_mylist($mylist) // do {
         warn "skipping '$mylist'... can't find mylist URL.\n";
-        return;
+        return; # empty
     };
     debug "feed URI = $feed_uri";
     my $feed = XML::Feed->parse($feed_uri) or do {
         warn "skipping '$mylist'... "
             . "error occurred while parsing RSS: "
             . XML::Feed->errstr(), "\n";
-        return;
+        return; # empty
     };
 
     return map { $_->link } $feed->entries;
