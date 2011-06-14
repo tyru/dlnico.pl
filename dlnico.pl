@@ -18,7 +18,7 @@ use File::Path qw(mkpath);
 
 
 my $NICOVIDEO;
-my $DEBUG_LEVEL = 0;
+my $DEBUG_LEVEL = 1;
 
 
 sub usage () {
