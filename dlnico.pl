@@ -17,6 +17,7 @@ use File::Spec::Functions qw(catfile);
 
 
 my $NICOVIDEO;
+my $DEBUG = 0;
 
 
 sub usage () {
@@ -24,6 +25,7 @@ sub usage () {
 }
 
 sub debug {
+    return unless $DEBUG;
     warn @_, "\n";
 }
 
@@ -136,6 +138,7 @@ GetOptions(
     'email=s' => \$email,
     'password=s' => \$password,
     'progressbar' => \$progressbar,
+    'debug' => \$DEBUG,
 ) or usage;
 usage if $needhelp;
 usage unless @ARGV;
