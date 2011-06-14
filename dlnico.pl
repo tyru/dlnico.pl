@@ -18,7 +18,7 @@ use File::Path qw(mkpath);
 
 
 my $NICOVIDEO;
-my $DEBUG = 0;
+my $DEBUG_LEVEL = 0;
 
 
 sub usage () {
@@ -26,18 +26,18 @@ sub usage () {
 }
 
 sub debug {
-    return unless $DEBUG;
-    warn @_, "\n";
+    my $level = shift;
+    warn @_, "\n" if $level >= $DEBUG_LEVEL;
 }
 
 sub download_mylist {
     my ($mylist, $file_path, $progressbar) = @_;
 
-    debug "downloading mylist '$mylist'...";
+    debug 1, "downloading mylist '$mylist'...";
     for my $video (get_videos_from_mylist($mylist)) {
         download_video($video, $file_path, $progressbar);
     }
-    debug "downloading mylist '$mylist'...done!";
+    debug 1, "downloading mylist '$mylist'...done!";
 }
 
 sub get_videos_from_mylist {
@@ -47,7 +47,7 @@ sub get_videos_from_mylist {
         warn "skipping '$mylist'... can't find mylist URL.\n";
         return; # empty
     };
-    debug "feed URI = $feed_uri";
+    debug 2, "feed URI = $feed_uri";
     my $feed = XML::Feed->parse($feed_uri) or do {
         warn "skipping '$mylist'... "
             . "error occurred while parsing RSS: "
@@ -61,13 +61,13 @@ sub get_videos_from_mylist {
 sub download_video {
     my ($video, $file_path, $progressbar) = @_;
 
-    debug "downloading video '$video'...";
+    debug 1, "downloading video '$video'...";
 
     my $video_id = get_video_id($video) // do {
         warn "skipping '$video'... can't find video ID.\n";
         return;
     };
-    debug "video ID = $video_id";
+    debug 2, "video ID = $video_id";
 
     mkpath $file_path;
     unless (-d $file_path) {
@@ -105,7 +105,7 @@ sub download_video {
     };
     warn "$@\n" if $@;
 
-    debug "downloading video '$video'...done!";
+    debug 1, "downloading video '$video'...done!";
 }
 
 sub get_video_id {
@@ -151,7 +151,7 @@ GetOptions(
     'email=s' => \$email,
     'password=s' => \$password,
     'progressbar' => \$progressbar,
-    'debug' => \$DEBUG,
+    'v|verbose' => sub { $DEBUG_LEVEL++ },
 ) or usage;
 usage if $needhelp;
 usage unless @ARGV;
@@ -160,8 +160,8 @@ if (!defined $email || !defined $password) {
 }
 
 # Initialization
-debug "email: $email";
-debug "password: $password";
+debug 2, "email: $email";
+debug 2, "password: $password";
 $NICOVIDEO = WWW::NicoVideo::Download->new(
     email    => $email,
     password => $password,
@@ -171,9 +171,9 @@ $NICOVIDEO = WWW::NicoVideo::Download->new(
 # TODO: recognize video or video ID (see SYNOPSIS for details).
 my $mylist = shift;
 my $file_path = shift // '.';
-debug "mylist: $mylist";
-debug "file_path: $file_path";
-debug "progressbar: $progressbar";
+debug 2, "mylist: $mylist";
+debug 2, "file_path: $file_path";
+debug 2, "progressbar: $progressbar";
 download_mylist($mylist, $file_path, $progressbar);
 
 
