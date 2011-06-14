@@ -51,7 +51,7 @@ sub get_videos_from_mylist {
     my $feed = XML::Feed->parse($feed_uri) or do {
         warn "skipping '$mylist'... "
             . "error occurred while parsing RSS: "
-            . XML::Feed->errstr();
+            . XML::Feed->errstr(), "\n";
         return;
     };
 
@@ -78,7 +78,7 @@ sub download_video {
         my $filename = catfile $file_path, "$video_id.flv";
         if ($progressbar) {
             my $wfh = IO::File->new($filename, 'w') or do {
-                warn "skipping '$video'... can't open '$filename' for writing.";
+                warn "skipping '$video'... can't open '$filename' for writing.\n";
                 return;
             };
             $NICOVIDEO->download($video_id, sub {
@@ -97,7 +97,7 @@ sub download_video {
             $NICOVIDEO->download($video_id, $filename);
         }
     };
-    warn $@ if $@;
+    warn "$@\n" if $@;
 
     debug "downloading video '$video'...done!";
 }
