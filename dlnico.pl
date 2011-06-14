@@ -68,20 +68,21 @@ sub download_video {
         return;
     };
     debug "video ID = $video_id";
-    eval {
-        mkpath $file_path;
-        unless (-d $file_path) {
-            warn "skipping '$video'... can't create directory '$file_path'.\n";
-            return;
-        }
 
+    mkpath $file_path;
+    unless (-d $file_path) {
+        warn "skipping '$video'... can't create directory '$file_path'.\n";
+        return;
+    }
+
+    my @download_args = do {
         my $filename = catfile $file_path, "$video_id.flv";
         if ($progressbar) {
             my $wfh = IO::File->new($filename, 'w') or do {
                 warn "skipping '$video'... can't open '$filename' for writing.\n";
                 return;
             };
-            $NICOVIDEO->download($video_id, sub {
+            my $callback = sub {
                 my ($chunk, $res, $proto) = @_;
                 print $wfh $chunk;
                 my $size = tell $wfh;
@@ -91,11 +92,16 @@ sub download_video {
                 else {
                     printf "%d/Unknown bytes\r", $size;
                 }
-            });
+            };
+            ($video_id, $callback);
         }
         else {
-            $NICOVIDEO->download($video_id, $filename);
+            ($video_id, $filename);
         }
+    };
+
+    eval {
+        $NICOVIDEO->download(@download_args);
     };
     warn "$@\n" if $@;
 
