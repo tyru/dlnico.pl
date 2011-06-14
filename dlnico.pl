@@ -14,6 +14,7 @@ use URI;
 use Web::Scraper;
 use XML::Feed;
 use File::Spec::Functions qw(catfile);
+use File::Path qw(mkpath);
 
 
 my $NICOVIDEO;
@@ -68,6 +69,12 @@ sub download_video {
     };
     debug "video ID = $video_id";
     eval {
+        mkpath $file_path;
+        unless (-d $file_path) {
+            warn "skipping '$video'... can't create directory '$file_path'.\n";
+            return;
+        }
+
         my $filename = catfile $file_path, "$video_id.flv";
         if ($progressbar) {
             my $wfh = IO::File->new($filename, 'w') or do {
