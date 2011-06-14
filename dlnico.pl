@@ -46,7 +46,8 @@ sub get_videos_from_mylist {
     };
     debug "feed URI = $feed_uri";
     my $feed = XML::Feed->parse($feed_uri) or do {
-        warn "error occurred while parsing RSS: "
+        warn "skipping '$mylist'... "
+            . "error occurred while parsing RSS: "
             . XML::Feed->errstr();
         return;
     };
