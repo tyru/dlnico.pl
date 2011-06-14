@@ -28,11 +28,11 @@ sub debug {
 }
 
 sub download_mylist {
-    my ($mylist, $file_path) = @_;
+    my ($mylist, $file_path, $progressbar) = @_;
 
     debug "downloading mylist '$mylist'...";
     for my $video (get_videos_from_mylist($mylist)) {
-        download_video($video, $file_path);
+        download_video($video, $file_path, $progressbar);
     }
     debug "downloading mylist '$mylist'...done!";
 }
@@ -56,7 +56,7 @@ sub get_videos_from_mylist {
 }
 
 sub download_video {
-    my ($video, $file_path) = @_;
+    my ($video, $file_path, $progressbar) = @_;
 
     debug "downloading video '$video'...";
 
@@ -66,18 +66,27 @@ sub download_video {
     };
     debug "video ID = $video_id";
     eval {
-        $NICOVIDEO->download($video_id, catfile $file_path, "$video_id.flv");
-        # $NICOVIDEO->download($video_id, sub {
-        #     my ($chunk, $res, $proto) = @_;
-        #     print $wfh $chunk;
-        #     my $size = tell $wfh;
-        #     if (my $total = $res->header('Content-Length')) {
-        #         printf "%d/%d (%f%%)\r", $size, $total, $size/$total*100;
-        #     }
-        #     else {
-        #         printf "%d/Unknown bytes\r", $size;
-        #     }
-        # });
+        my $filename = catfile $file_path, "$video_id.flv";
+        if ($progressbar) {
+            my $wfh = IO::File->new($filename, 'w') or do {
+                warn "skipping '$video'... can't open '$filename' for writing.";
+                return;
+            };
+            $NICOVIDEO->download($video_id, sub {
+                my ($chunk, $res, $proto) = @_;
+                print $wfh $chunk;
+                my $size = tell $wfh;
+                if (my $total = $res->header('Content-Length')) {
+                    printf "%d/%d (%f%%)\r", $size, $total, $size/$total*100;
+                }
+                else {
+                    printf "%d/Unknown bytes\r", $size;
+                }
+            });
+        }
+        else {
+            $NICOVIDEO->download($video_id, $filename);
+        }
     };
     warn $@ if $@;
 
@@ -121,10 +130,12 @@ sub get_feed_from_mylist {
 my $needhelp;
 my $email;
 my $password;
+my $progressbar = 0;
 GetOptions(
     'h|help' => \$needhelp,
     'email=s' => \$email,
     'password=s' => \$password,
+    'progressbar' => \$progressbar,
 ) or usage;
 usage if $needhelp;
 usage unless @ARGV;
@@ -146,7 +157,8 @@ my $mylist = shift;
 my $file_path = shift // '.';
 debug "mylist: $mylist";
 debug "file_path: $file_path";
-download_mylist($mylist, $file_path);
+debug "progressbar: $progressbar";
+download_mylist($mylist, $file_path, $progressbar);
 
 
 
