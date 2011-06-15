@@ -40,6 +40,32 @@ sub format_string {
     return $format;
 }
 
+my $SIZE_KiB = 1024;
+my $SIZE_MiB = 1024 * 1024;
+my $SIZE_GiB = 1024 * 1024 * 1024;
+sub readable_size {
+    my ($byte_num) = @_;
+
+    my ($num, $postfix) = do {
+        if ($byte_num < $SIZE_KiB) {
+            # 0 <= $byte_num < 1024
+            ($byte_num, "B");
+        }
+        elsif ($byte_num < $SIZE_MiB) {
+            # 1024 <= $byte_num < 1024 * 1024
+            ($byte_num / $SIZE_KiB, "KiB");
+        }
+        elsif ($byte_num < $SIZE_GiB) {
+            # 1024 * 1024 <= $byte_num < 1024 * 1024 * 1024
+            ($byte_num / $SIZE_MiB, "MiB");
+        }
+        else {
+            # 1024 * 1024 * 1024 <= $byte_num
+            ($byte_num / $SIZE_GiB, "GiB");
+        }
+    };
+    return sprintf('%.3f', $num).$postfix;
+}
 
 # *video* ($video) is either:
 # - *video ID* ($video_id)
@@ -94,10 +120,14 @@ sub download_video {
                 print $wfh $chunk;
                 my $size = tell $wfh;
                 if (my $total = $res->header('Content-Length')) {
-                    printf "%d/%d (%f%%)\r", $size, $total, $size/$total*100;
+                    printf "%s/%s (%.5f%%)\r",
+                            readable_size($size),
+                            readable_size($total),
+                            $size/$total*100;
                 }
                 else {
-                    printf "%d/Unknown bytes\r", $size;
+                    printf "%s/Unknown bytes\r",
+                            readable_size($size);
                 }
             };
             ($video_id, $callback);
