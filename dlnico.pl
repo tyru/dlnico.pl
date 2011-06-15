@@ -279,9 +279,46 @@ __END__
 
 =over
 
-=item -h, --help
+=item -h
 
-Show this help.
+Show short help.
+
+=item --help
+
+Show long help.
+
+=item --email
+
+Your email (as ID).
+
+if you have installed Config::Pit,
+and does not specify C<--email>,
+Config::Pit::pit_get() will invoke.
+
+=item --password
+
+Your password.
+
+if you have installed Config::Pit,
+and does not specify C<--email>,
+Config::Pit::pit_get() will invoke.
+
+=item --progressbar
+
+Show progressbar while downloading.
+
+=item --skip-exist
+
+If there is already a file
+on the path of saving .flv file, skip it.
+
+=item -q, --quiet
+
+Run quietly.
+
+=item -v, --verbose
+
+Run verbosely.
 
 =back
 
