@@ -210,19 +210,19 @@ sub is_video {
 my $email;
 my $password;
 my $opt = {
-    progressbar => 0,
-    overwrite   => 0,
+    progressbar     => 0,
+    overwrite       => 0,
     filename_format => '${video_id}.flv',
 };
 GetOptions(
-    'h'           => sub { usage(1) },
-    'help'        => sub { usage(2) },
-    'email=s'     => \$email,
-    'password=s'  => \$password,
-    'progressbar' => \$opt->{progressbar},
-    'overwrite'   => \$opt->{overwrite},
-    'q|quiet'     => sub { $DEBUG_LEVEL-- },
-    'v|verbose'   => sub { $DEBUG_LEVEL++ },
+    'h'                 => sub { usage(1) },
+    'help'              => sub { usage(2) },
+    'email=s'           => \$email,
+    'password=s'        => \$password,
+    'progressbar'       => \$opt->{progressbar},
+    'overwrite'         => \$opt->{overwrite},
+    'q|quiet'           => sub { $DEBUG_LEVEL-- },
+    'v|verbose'         => sub { $DEBUG_LEVEL++ },
     'filename-format=s' => \$opt->{filename_format},
 ) or usage();
 usage() unless @ARGV;
