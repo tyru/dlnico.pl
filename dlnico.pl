@@ -59,10 +59,11 @@ sub download_mylist {
 sub get_videos_from_mylist {
     my ($mylist) = @_;
 
-    my $feed_uri = get_feed_from_mylist($mylist) // do {
-        warn "skipping '$mylist'... can't find mylist URL.\n";
+    my $mylist_id = get_mylist_id($mylist) // do {
+        warn "skipping '$mylist'... can't find mylist ID.\n";
         return; # empty
     };
+    my $feed_uri = URI->new("http://www.nicovideo.jp/mylist/$mylist_id?rss=2.0");
     debug 2, "feed URI = $feed_uri";
     my $feed = XML::Feed->parse($feed_uri) or do {
         warn "skipping '$mylist'... "
@@ -142,13 +143,12 @@ sub get_video_id {
     return undef;
 }
 
-# Returns feed URI-reference value from *mylist*.
-sub get_feed_from_mylist {
+sub get_mylist_id {
     my ($mylist) = @_;
 
     # mylist ID
     if ($mylist =~ $MYLIST_ID) {
-        return URI->new("http://www.nicovideo.jp/mylist/$mylist?rss=2.0");
+        return $mylist;
     }
 
     # mylist URI
@@ -156,14 +156,22 @@ sub get_feed_from_mylist {
     if ($uri->scheme =~ /\Ahttps?\Z/
         && ($uri->path_segments)[-1] =~ $MYLIST_ID)
     {
-        $uri->query_form('rss', '2.0');
-        return $uri;
+        return ($uri->path_segments)[-1];
     }
 
     # else
     return undef;
 }
 
+sub is_mylist {
+    my ($arg) = @_;
+    return defined get_mylist_id($arg);
+}
+
+sub is_video {
+    my ($arg) = @_;
+    return defined get_video_id($arg);
+}
 
 my $needhelp;
 my $email;
@@ -205,13 +213,17 @@ $NICOVIDEO = WWW::NicoVideo::Download->new(
 );
 
 # Download all videos from mylist.
-# TODO: recognize video or video ID (see SYNOPSIS for details).
-my $mylist = shift;
+my $arg = shift;
 my $file_path = shift // '.';
-debug 2, "mylist: $mylist";
+debug 2, "first arg: $arg";
 debug 2, "file_path: $file_path";
 debug 2, "progressbar: $progressbar";
-download_mylist($mylist, $file_path, $progressbar);
+if (is_video($arg)) {
+    download_video($arg, $file_path, $progressbar);
+}
+elsif (is_mylist($arg)) {
+    download_mylist($arg, $file_path, $progressbar);
+}
 
 
 
