@@ -58,6 +58,12 @@ sub download_video {
     };
     debug 2, "video ID = $video_id";
 
+    my $filename = catfile $file_path, "$video_id.flv";
+    if ($opt->{skip_exist} && -e $filename) {
+        warn "skipping '$video'... path '$filename' exists.\n";
+        return;
+    }
+
     mkpath $file_path;
     unless (-d $file_path) {
         warn "skipping '$video'... can't create directory '$file_path'.\n";
@@ -65,12 +71,6 @@ sub download_video {
     }
 
     my @download_args = do {
-        my $filename = catfile $file_path, "$video_id.flv";
-        if ($opt->{skip_exist} && -e $filename) {
-            warn "skipping '$video'... path '$filename' exists.\n";
-            return;
-        }
-
         if ($opt->{progressbar}) {
             my $wfh = IO::File->new($filename, 'w') or do {
                 warn "skipping '$video'... can't open '$filename' for writing.\n";
