@@ -115,6 +115,7 @@ sub download_video {
                 warn "skipping '$video'... can't open '$filename' for writing.\n";
                 return;
             };
+            binmode $wfh;
             my $callback = sub {
                 my ($chunk, $res, $proto) = @_;
                 print $wfh $chunk;
