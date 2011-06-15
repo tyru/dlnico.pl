@@ -24,8 +24,9 @@ my $VIDEO_ID  = qr/\A[sn]m\d+\Z/;
 my $MYLIST_ID = qr/\A\d+\Z/;
 
 
-sub usage () {
-    pod2usage(-verbose => 1);
+sub usage {
+    my $level = shift // 1;
+    pod2usage(-verbose => $level);
 }
 
 sub debug {
@@ -183,20 +184,20 @@ sub is_video {
 
 
 ### Parse arguments.
-my $needhelp;
 my $email;
 my $password;
 my $progressbar = 0;
 GetOptions(
-    'h|help' => \$needhelp,
+    'h'    => sub { usage(1) },
+    'help' => sub { usage(2) },
     'email=s' => \$email,
     'password=s' => \$password,
     'progressbar' => \$progressbar,
     'q|quiet' => sub { $DEBUG_LEVEL-- },
     'v|verbose' => sub { $DEBUG_LEVEL++ },
-) or usage;
-usage if $needhelp;
-usage unless @ARGV;
+) or usage();
+usage() unless @ARGV;
+
 if (!defined $email || !defined $password) {
     if (eval { require Config::Pit }) {
         my $c = Config::Pit::pit_get(
