@@ -116,20 +116,33 @@ sub download_video {
                 return;
             };
             binmode $wfh;
+            my $prev_disp; # updated continually in $callback.
             my $callback = sub {
                 my ($chunk, $res, $proto) = @_;
+
                 print $wfh $chunk;
+
+                # Build progressbar string.
                 my $size = tell $wfh;
+                my $str;
                 if (my $total = $res->header('Content-Length')) {
-                    printf "%s/%s (%.5f%%)\r",
+                    $str = sprintf "%s/%s (%.5f%%)",
                             readable_size($size),
                             readable_size($total),
                             $size/$total*100;
                 }
                 else {
-                    printf "%s/Unknown bytes\r",
+                    $str = sprintf "%s/Unknown bytes",
                             readable_size($size);
                 }
+
+                # Output progressbar.
+                print "\r$str";
+                my $disp = length $str;
+                if (defined $prev_disp && $prev_disp > $disp) {
+                    print ' ' x ($prev_disp - $disp);
+                }
+                $prev_disp = $disp;
             };
             ($video_id, $callback);
         }
