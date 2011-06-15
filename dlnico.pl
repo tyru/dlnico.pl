@@ -34,6 +34,11 @@ sub debug {
     warn @_, "\n" if $level <= $DEBUG_LEVEL;
 }
 
+sub format_string {
+    my ($format, $opt) = @_;
+    $format =~ s[ (\${(\w+)}) ][ $opt->{$2} // $1 ]gex;
+    return $format;
+}
 
 
 # *video* ($video) is either:
@@ -61,7 +66,11 @@ sub download_video {
         debug 2, "video ID = $video_id";
 
         # Check --overwrite.
-        my $filename = catfile $file_path, "$video_id.flv";
+        my $filename = format_string($opt->{filename_format}, {
+            video_id => $video_id,
+            # TODO: more keys
+        });
+        $filename = catfile $file_path, $filename;
         if (!$opt->{overwrite} && -e $filename) {
             warn "skipping '$video'... path '$filename' exists.\n";
             return;
@@ -203,6 +212,7 @@ my $password;
 my $opt = {
     progressbar => 0,
     overwrite   => 0,
+    filename_format => '${video_id}.flv',
 };
 GetOptions(
     'h'           => sub { usage(1) },
@@ -213,6 +223,7 @@ GetOptions(
     'overwrite'   => \$opt->{overwrite},
     'q|quiet'     => sub { $DEBUG_LEVEL-- },
     'v|verbose'   => sub { $DEBUG_LEVEL++ },
+    'filename-format=s' => \$opt->{filename_format},
 ) or usage();
 usage() unless @ARGV;
 
