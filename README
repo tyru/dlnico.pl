@@ -22,7 +22,7 @@ Options:
         if you have installed Config::Pit, and does not specify "--email",
         Config::Pit::pit_get() will invoke.
 
-    --progressbar
+    --progress
         Show progressbar while downloading.
 
     --overwrite

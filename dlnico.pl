@@ -84,7 +84,7 @@ sub download_video {
         }
 
         # Build arguments for $NICOVIDEO->download().
-        if ($opt->{progressbar}) {
+        if ($opt->{progress}) {
             my $wfh = IO::File->new($filename, 'w') or do {
                 warn "skipping '$video'... can't open '$filename' for writing.\n";
                 return;
@@ -210,7 +210,7 @@ sub is_video {
 my $email;
 my $password;
 my $opt = {
-    progressbar     => 0,
+    progress        => 0,
     overwrite       => 0,
     filename_format => '${video_id}.flv',
 };
@@ -219,7 +219,7 @@ GetOptions(
     'help'              => sub { usage(2) },
     'email=s'           => \$email,
     'password=s'        => \$password,
-    'progressbar'       => \$opt->{progressbar},
+    'progress'          => \$opt->{progress},
     'overwrite'         => \$opt->{overwrite},
     'q|quiet'           => sub { $DEBUG_LEVEL-- },
     'v|verbose'         => sub { $DEBUG_LEVEL++ },
@@ -314,7 +314,7 @@ if you have installed Config::Pit,
 and does not specify C<--email>,
 Config::Pit::pit_get() will invoke.
 
-=item --progressbar
+=item --progress
 
 Show progressbar while downloading.
 
