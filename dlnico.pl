@@ -45,36 +45,7 @@ sub debug {
 
 
 
-sub download_mylist {
-    my ($mylist, $file_path, $progressbar) = @_;
-
-    debug 1, "downloading mylist '$mylist'...";
-    for my $video (get_videos_from_mylist($mylist)) {
-        download_video($video, $file_path, $progressbar);
-    }
-    debug 1, "downloading mylist '$mylist'...done!";
-}
-
-# Returns array of *video*es from *mylist*.
-sub get_videos_from_mylist {
-    my ($mylist) = @_;
-
-    my $mylist_id = get_mylist_id($mylist) // do {
-        warn "skipping '$mylist'... can't find mylist ID.\n";
-        return; # empty
-    };
-    my $feed_uri = URI->new("http://www.nicovideo.jp/mylist/$mylist_id?rss=2.0");
-    debug 2, "feed URI = $feed_uri";
-    my $feed = XML::Feed->parse($feed_uri) or do {
-        warn "skipping '$mylist'... "
-            . "error occurred while parsing RSS: "
-            . XML::Feed->errstr(), "\n";
-        return; # empty
-    };
-
-    return map { $_->link } $feed->entries;
-}
-
+# Download *video*.
 sub download_video {
     my ($video, $file_path, $progressbar) = @_;
 
@@ -123,6 +94,37 @@ sub download_video {
     debug 1, "downloading video '$video'...done!";
 }
 
+# Download *mylist*.
+sub download_mylist {
+    my ($mylist, $file_path, $progressbar) = @_;
+
+    debug 1, "downloading mylist '$mylist'...";
+    for my $video (get_videos_from_mylist($mylist)) {
+        download_video($video, $file_path, $progressbar);
+    }
+    debug 1, "downloading mylist '$mylist'...done!";
+}
+
+# Returns array of *video*es from *mylist*.
+sub get_videos_from_mylist {
+    my ($mylist) = @_;
+
+    my $mylist_id = get_mylist_id($mylist) // do {
+        warn "skipping '$mylist'... can't find mylist ID.\n";
+        return; # empty
+    };
+    my $feed_uri = URI->new("http://www.nicovideo.jp/mylist/$mylist_id?rss=2.0");
+    debug 2, "feed URI = $feed_uri";
+    my $feed = XML::Feed->parse($feed_uri) or do {
+        warn "skipping '$mylist'... "
+            . "error occurred while parsing RSS: "
+            . XML::Feed->errstr(), "\n";
+        return; # empty
+    };
+
+    return map { $_->link } $feed->entries;
+}
+
 # Returns *video ID* from *video*.
 sub get_video_id {
     my ($video) = @_;
@@ -143,6 +145,7 @@ sub get_video_id {
     return undef;
 }
 
+# Returns *mylist ID* from *mylist*
 sub get_mylist_id {
     my ($mylist) = @_;
 
@@ -163,16 +166,23 @@ sub get_mylist_id {
     return undef;
 }
 
+# Returns true is argument is *mylist*.
+# Returns false otherwise.
 sub is_mylist {
     my ($arg) = @_;
     return defined get_mylist_id($arg);
 }
 
+# Returns true is argument is *video*.
+# Returns false otherwise.
 sub is_video {
     my ($arg) = @_;
     return defined get_video_id($arg);
 }
 
+
+
+### Parse arguments.
 my $needhelp;
 my $email;
 my $password;
@@ -204,7 +214,7 @@ if (!defined $email || !defined $password) {
     die "--email and --password are required.\n";
 }
 
-# Initialization
+### Initialize $NICOVIDEO.
 debug 2, "email: $email";
 debug 2, "password: $password";
 $NICOVIDEO = WWW::NicoVideo::Download->new(
@@ -212,16 +222,18 @@ $NICOVIDEO = WWW::NicoVideo::Download->new(
     password => $password,
 );
 
-# Download all videos from mylist.
+### Start downloading.
 my $arg = shift;
 my $file_path = shift // '.';
 debug 2, "first arg: $arg";
 debug 2, "file_path: $file_path";
 debug 2, "progressbar: $progressbar";
 if (is_video($arg)) {
+    # Download and save the video to $file_path.
     download_video($arg, $file_path, $progressbar);
 }
 elsif (is_mylist($arg)) {
+    # Download and save all videos in the mylist to $file_path.
     download_mylist($arg, $file_path, $progressbar);
 }
 else {
