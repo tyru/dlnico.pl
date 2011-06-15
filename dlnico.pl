@@ -52,25 +52,29 @@ sub download_video {
 
     debug 1, "downloading video '$video'...";
 
-    my $video_id = get_video_id($video) // do {
-        warn "skipping '$video'... can't find video ID.\n";
-        return;
-    };
-    debug 2, "video ID = $video_id";
-
-    my $filename = catfile $file_path, "$video_id.flv";
-    if ($opt->{skip_exist} && -e $filename) {
-        warn "skipping '$video'... path '$filename' exists.\n";
-        return;
-    }
-
-    mkpath $file_path;
-    unless (-d $file_path) {
-        warn "skipping '$video'... can't create directory '$file_path'.\n";
-        return;
-    }
-
     my @download_args = do {
+        # Get video ID.
+        my $video_id = get_video_id($video) // do {
+            warn "skipping '$video'... can't find video ID.\n";
+            return;
+        };
+        debug 2, "video ID = $video_id";
+
+        # Check --skip-exist.
+        my $filename = catfile $file_path, "$video_id.flv";
+        if ($opt->{skip_exist} && -e $filename) {
+            warn "skipping '$video'... path '$filename' exists.\n";
+            return;
+        }
+
+        # Make parent directory of saving .flv file.
+        mkpath $file_path;
+        unless (-d $file_path) {
+            warn "skipping '$video'... can't create directory '$file_path'.\n";
+            return;
+        }
+
+        # Build arguments for $NICOVIDEO->download().
         if ($opt->{progressbar}) {
             my $wfh = IO::File->new($filename, 'w') or do {
                 warn "skipping '$video'... can't open '$filename' for writing.\n";
@@ -115,17 +119,22 @@ sub download_mylist {
 sub get_videos_from_mylist {
     my ($mylist) = @_;
 
+    # Get mylist ID from $mylist.
     my $mylist_id = get_mylist_id($mylist) // do {
         warn "skipping '$mylist'... can't find mylist ID.\n";
-        return; # empty
+        return; # empty list
     };
+
+    # Get RSS feed from $mylist_id.
     my $feed_uri = URI->new("http://www.nicovideo.jp/mylist/$mylist_id?rss=2.0");
     debug 2, "feed URI = $feed_uri";
+
+    # Parse RSS feed.
     my $feed = XML::Feed->parse($feed_uri) or do {
         warn "skipping '$mylist'... "
             . "error occurred while parsing RSS: "
             . XML::Feed->errstr(), "\n";
-        return; # empty
+        return; # empty list
     };
 
     return map { $_->link } $feed->entries;
