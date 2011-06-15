@@ -30,7 +30,7 @@ sub usage () {
 
 sub debug {
     my $level = shift;
-    warn @_, "\n" if $level >= $DEBUG_LEVEL;
+    warn @_, "\n" if $level <= $DEBUG_LEVEL;
 }
 
 
