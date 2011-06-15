@@ -20,6 +20,9 @@ use File::Path qw(mkpath);
 my $NICOVIDEO;
 my $DEBUG_LEVEL = 1;
 
+my $VIDEO_ID  = qr/\A[sn]m\d+\Z/;
+my $MYLIST_ID = qr/\A\d+\Z/;
+
 
 sub usage () {
     pod2usage(-verbose => 1);
@@ -29,6 +32,18 @@ sub debug {
     my $level = shift;
     warn @_, "\n" if $level >= $DEBUG_LEVEL;
 }
+
+
+
+# *video* ($video) is either:
+# - *video ID* ($video_id)
+# - *video URI* ($video_uri)
+#
+# *mylist* ($mylist) is either:
+# - *mylist ID* ($mylist_id)
+# - *mylist URI* ($mylist_uri)
+
+
 
 sub download_mylist {
     my ($mylist, $file_path, $progressbar) = @_;
@@ -40,6 +55,7 @@ sub download_mylist {
     debug 1, "downloading mylist '$mylist'...done!";
 }
 
+# Returns array of *video*es from *mylist*.
 sub get_videos_from_mylist {
     my ($mylist) = @_;
 
@@ -100,26 +116,33 @@ sub download_video {
         }
     };
 
-    eval {
-        $NICOVIDEO->download(@download_args);
-    };
+    eval { $NICOVIDEO->download(@download_args) };
     warn "$@\n" if $@;
 
     debug 1, "downloading video '$video'...done!";
 }
 
+# Returns *video ID* from *video*.
 sub get_video_id {
     my ($video) = @_;
 
-    return $video if $video =~ /\A[sn]m\d+\Z/;
+    # video ID
+    if ($video =~ $VIDEO_ID) {
+        return $video;
+    }
 
-    # we assume URI
+    # video URI
     my $uri = URI->new($video);
     my @segments = $uri->path_segments();
-    return @segments ? $segments[-1] : undef;
+    if (@segments && $segments[-1] =~ $VIDEO_ID) {
+        return $segments[-1];
+    }
+
+    # else
+    return undef;
 }
 
-my $MYLIST_ID = qr/\A\d+\Z/;
+# Returns feed URI-reference value from *mylist*.
 sub get_feed_from_mylist {
     my ($mylist) = @_;
 
