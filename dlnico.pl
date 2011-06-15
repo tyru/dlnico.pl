@@ -255,6 +255,14 @@ Show this help.
 =back
 
 
+=head1 TODO
+
+=over
+
+=item parallel download using Coro.
+
+=back
+
 =head1 AUTHOR
 
 tyru <tyru.exe@gmail.com>
