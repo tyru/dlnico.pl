@@ -188,13 +188,13 @@ my $email;
 my $password;
 my $progressbar = 0;
 GetOptions(
-    'h'    => sub { usage(1) },
-    'help' => sub { usage(2) },
-    'email=s' => \$email,
-    'password=s' => \$password,
+    'h'           => sub { usage(1) },
+    'help'        => sub { usage(2) },
+    'email=s'     => \$email,
+    'password=s'  => \$password,
     'progressbar' => \$progressbar,
-    'q|quiet' => sub { $DEBUG_LEVEL-- },
-    'v|verbose' => sub { $DEBUG_LEVEL++ },
+    'q|quiet'     => sub { $DEBUG_LEVEL-- },
+    'v|verbose'   => sub { $DEBUG_LEVEL++ },
 ) or usage();
 usage() unless @ARGV;
 
