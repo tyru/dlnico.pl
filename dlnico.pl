@@ -48,7 +48,7 @@ sub debug {
 
 # Download *video*.
 sub download_video {
-    my ($video, $file_path, $progressbar) = @_;
+    my ($video, $file_path, $opt) = @_;
 
     debug 1, "downloading video '$video'...";
 
@@ -66,7 +66,12 @@ sub download_video {
 
     my @download_args = do {
         my $filename = catfile $file_path, "$video_id.flv";
-        if ($progressbar) {
+        if ($opt->{skip_exist} && -e $filename) {
+            warn "skipping '$video'... path '$filename' exists.\n";
+            return;
+        }
+
+        if ($opt->{progressbar}) {
             my $wfh = IO::File->new($filename, 'w') or do {
                 warn "skipping '$video'... can't open '$filename' for writing.\n";
                 return;
@@ -97,11 +102,11 @@ sub download_video {
 
 # Download *mylist*.
 sub download_mylist {
-    my ($mylist, $file_path, $progressbar) = @_;
+    my ($mylist, $file_path, $opt) = @_;
 
     debug 1, "downloading mylist '$mylist'...";
     for my $video (get_videos_from_mylist($mylist)) {
-        download_video($video, $file_path, $progressbar);
+        download_video($video, $file_path, $opt);
     }
     debug 1, "downloading mylist '$mylist'...done!";
 }
@@ -186,13 +191,17 @@ sub is_video {
 ### Parse arguments.
 my $email;
 my $password;
-my $progressbar = 0;
+my $opt = {
+    progressbar => 0,
+    skip_exist => 0,
+};
 GetOptions(
     'h'           => sub { usage(1) },
     'help'        => sub { usage(2) },
     'email=s'     => \$email,
     'password=s'  => \$password,
-    'progressbar' => \$progressbar,
+    'progressbar' => \$opt->{progressbar},
+    'skip-exist'  => \$opt->{skip_exist},
     'q|quiet'     => sub { $DEBUG_LEVEL-- },
     'v|verbose'   => sub { $DEBUG_LEVEL++ },
 ) or usage();
@@ -228,14 +237,13 @@ my $arg = shift;
 my $file_path = shift // '.';
 debug 2, "first arg: $arg";
 debug 2, "file_path: $file_path";
-debug 2, "progressbar: $progressbar";
 if (is_video($arg)) {
     # Download and save the video to $file_path.
-    download_video($arg, $file_path, $progressbar);
+    download_video($arg, $file_path, $opt);
 }
 elsif (is_mylist($arg)) {
     # Download and save all videos in the mylist to $file_path.
-    download_mylist($arg, $file_path, $progressbar);
+    download_mylist($arg, $file_path, $opt);
 }
 else {
     die "error: don't know what to do for '$arg'.\n";
