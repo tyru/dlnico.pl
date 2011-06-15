@@ -31,7 +31,7 @@ sub usage {
 
 sub debug {
     my $level = shift;
-    warn @_, "\n" if $level <= $DEBUG_LEVEL;
+    print @_, "\n" if $level <= $DEBUG_LEVEL;
 }
 
 sub format_string {
