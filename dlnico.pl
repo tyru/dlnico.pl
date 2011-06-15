@@ -244,6 +244,7 @@ __END__
     $ dlnico.pl http://www.nicovideo.jp/watch/sm14043624 # download the video
     $ dlnico.pl sm14043624                               # same as above
 
+
 =head1 OPTIONS
 
 =over
@@ -262,6 +263,7 @@ Show this help.
 =item parallel download using Coro.
 
 =back
+
 
 =head1 AUTHOR
 
