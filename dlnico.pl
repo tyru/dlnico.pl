@@ -62,7 +62,7 @@ sub download_video {
 
         # Check --skip-exist.
         my $filename = catfile $file_path, "$video_id.flv";
-        if ($opt->{skip_exist} && -e $filename) {
+        if (!$opt->{overwrite} && -e $filename) {
             warn "skipping '$video'... path '$filename' exists.\n";
             return;
         }
@@ -202,7 +202,7 @@ my $email;
 my $password;
 my $opt = {
     progressbar => 0,
-    skip_exist => 0,
+    overwrite   => 0,
 };
 GetOptions(
     'h'           => sub { usage(1) },
@@ -210,7 +210,7 @@ GetOptions(
     'email=s'     => \$email,
     'password=s'  => \$password,
     'progressbar' => \$opt->{progressbar},
-    'skip-exist'  => \$opt->{skip_exist},
+    'overwrite'   => \$opt->{overwrite},
     'q|quiet'     => sub { $DEBUG_LEVEL-- },
     'v|verbose'   => sub { $DEBUG_LEVEL++ },
 ) or usage();
