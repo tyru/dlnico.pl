@@ -342,6 +342,12 @@ Run verbosely.
 
 =item parallel download using Coro.
 
+=item write about C<--filename-format> syntax.
+
+=item add available keys in C<--filename-format> syntax.
+
+=item test, test, test.
+
 =back
 
 
