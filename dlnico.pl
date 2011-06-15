@@ -307,10 +307,12 @@ Config::Pit::pit_get() will invoke.
 
 Show progressbar while downloading.
 
-=item --skip-exist
+=item --overwrite
 
-If there is already a file
+Default behavior is that
+if there is already a file
 on the path of saving .flv file, skip it.
+but overwrite it if you specify this C<--overwrite> option.
 
 =item -q, --quiet
 
