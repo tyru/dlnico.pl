@@ -60,7 +60,7 @@ sub download_video {
         };
         debug 2, "video ID = $video_id";
 
-        # Check --skip-exist.
+        # Check --overwrite.
         my $filename = catfile $file_path, "$video_id.flv";
         if (!$opt->{overwrite} && -e $filename) {
             warn "skipping '$video'... path '$filename' exists.\n";
