@@ -287,7 +287,7 @@ Show short help.
 
 Show long help.
 
-=item --email
+=item --email {email}
 
 Your email (as ID).
 
@@ -295,7 +295,7 @@ if you have installed Config::Pit,
 and does not specify C<--email>,
 Config::Pit::pit_get() will invoke.
 
-=item --password
+=item --password {password}
 
 Your password.
 
