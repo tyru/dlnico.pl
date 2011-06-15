@@ -224,6 +224,9 @@ if (is_video($arg)) {
 elsif (is_mylist($arg)) {
     download_mylist($arg, $file_path, $progressbar);
 }
+else {
+    die "error: don't know what to do for '$arg'.\n";
+}
 
 
 
