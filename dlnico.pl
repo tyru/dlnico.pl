@@ -122,7 +122,7 @@ sub download_video {
 
                 print $wfh $chunk;
 
-                # Build progressbar string.
+                # Build progress string.
                 my $size = tell $wfh;
                 my $str;
                 if (my $total = $res->header('Content-Length')) {
@@ -136,7 +136,7 @@ sub download_video {
                             readable_size($size);
                 }
 
-                # Output progressbar.
+                # Output progress.
                 print "\r$str";
                 my $disp = length $str;
                 if (defined $prev_disp && $prev_disp > $disp) {
@@ -375,7 +375,7 @@ Config::Pit::pit_get() will invoke.
 
 =item --progress
 
-Show progressbar while downloading.
+Show progress while downloading.
 
 =item --overwrite
 

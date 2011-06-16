@@ -36,7 +36,7 @@ Options:
         Config::Pit::pit_get() will invoke.
 
     --progress
-        Show progressbar while downloading.
+        Show progress while downloading.
 
     --overwrite
         Default behavior is that if there is already a file on the path of
