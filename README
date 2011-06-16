@@ -1,4 +1,17 @@
 Usage:
+        $ dlnico.pl {video or mylist} [{saved directory}]
+
+        {video}
+            video URI or number prefixed with "sm" or "nm".
+
+        {mylist}
+            mylist URI or number.
+
+        {saved directory}
+            the directory where downloaded video(s) are saved.
+            default value is "." (current directory) .
+
+Usage:
         $ dlnico.pl http://www.nicovideo.jp/mylist/22370493  # download all videos in mylist
         $ dlnico.pl 22370493                                 # same as above
         $ dlnico.pl http://www.nicovideo.jp/watch/sm14043624 # download the video

@@ -322,6 +322,21 @@ __END__
     dlnico.pl - NicoVideo downloader
 
 
+=head1 USAGE
+
+    $ dlnico.pl {video or mylist} [{saved directory}]
+
+    {video}
+        video URI or number prefixed with "sm" or "nm".
+
+    {mylist}
+        mylist URI or number.
+
+    {saved directory}
+        the directory where downloaded video(s) are saved.
+        default value is "." (current directory) .
+
+
 =head1 SYNOPSIS
 
     $ dlnico.pl http://www.nicovideo.jp/mylist/22370493  # download all videos in mylist
