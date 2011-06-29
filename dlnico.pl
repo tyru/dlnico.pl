@@ -151,9 +151,12 @@ sub download_video {
     };
 
     eval { $NICOVIDEO->download(@download_args) };
-    warn "$@\n" if $@;
-
-    debug 1, "downloading video '$video'...done!";
+    if ($@) {
+        warn "$@\n";
+    }
+    else {
+        debug 1, "downloading video '$video'...done!";
+    }
 }
 
 # Download *mylist*.
