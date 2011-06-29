@@ -167,7 +167,7 @@ sub download_mylist {
     debug 1, "downloading mylist '$mylist'...done!";
 }
 
-# Returns array of *video*es from *mylist*.
+# Returns array of *video*s from *mylist*.
 sub get_videos_from_mylist {
     my ($mylist) = @_;
 
@@ -233,14 +233,14 @@ sub get_mylist_id {
     return undef;
 }
 
-# Returns true is argument is *mylist*.
+# Returns true if argument is *mylist*.
 # Returns false otherwise.
 sub is_mylist {
     my ($arg) = @_;
     return defined get_mylist_id($arg);
 }
 
-# Returns true is argument is *video*.
+# Returns true if argument is *video*.
 # Returns false otherwise.
 sub is_video {
     my ($arg) = @_;
