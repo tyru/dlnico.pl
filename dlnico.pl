@@ -11,7 +11,6 @@ use Getopt::Long qw(:config gnu_compat no_bundling no_ignore_case);
 use Pod::Usage;
 use WWW::NicoVideo::Download;
 use URI;
-use Web::Scraper;
 use XML::Feed;
 use File::Spec::Functions qw(catfile);
 use File::Path qw(mkpath);
