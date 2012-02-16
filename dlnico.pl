@@ -256,7 +256,7 @@ sub is_video {
 my $email;
 my $password;
 my $opt = {
-    progress        => 0,
+    progress        => 1,
     overwrite       => 0,
     filename_format => '${video_id}.flv',
 };
@@ -265,7 +265,7 @@ GetOptions(
     'help'              => sub { usage(2) },
     'email=s'           => \$email,
     'password=s'        => \$password,
-    'progress'          => \$opt->{progress},
+    'no-progress'       => sub { $opt->{progress} = 0 },
     'overwrite'         => \$opt->{overwrite},
     'q|quiet'           => sub { $DEBUG_LEVEL-- },
     'v|verbose'         => sub { $DEBUG_LEVEL++ },
