@@ -151,6 +151,7 @@ sub download_video {
     };
 
     eval { $NICOVIDEO->download(@download_args) };
+    print "\n";    # go to next line of progressbar.
     if ($@) {
         warn "$@\n";
     }
