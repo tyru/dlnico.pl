@@ -306,6 +306,10 @@ $NICOVIDEO = WWW::NicoVideo::Download->new(
     password => $password,
 );
 
+### Auto-conversion from Perl internal encoding to terminal encoding.
+binmode STDOUT, ':utf8';
+binmode STDERR, ':utf8';
+
 ### Start downloading.
 my $arg = shift;
 my $file_path = shift // '.';
