@@ -90,14 +90,20 @@ sub download_video {
         };
         debug 2, "video ID = $video_id";
 
-        # Get $format->{title} .
-        my $format = {video_id => $video_id};
-        $format->{title} = do {
-            my $URL = "http://ext.nicovideo.jp/api/getthumbinfo/$video_id";
+        # Get and store info in $format.
+        my $format = {};
+        do {
             require XML::Simple;
-            require LWP::Simple;
-            my $xml = XML::Simple::XMLin(LWP::Simple::get($URL));
-            $xml->{thumb}{title};
+            my $URL = "http://ext.nicovideo.jp/api/getthumbinfo/$video_id";
+            my $res = $NICOVIDEO->user_agent->get($URL);
+            unless ($res->is_success) {
+                die "Can't fetch meta data: ".$res->status_line;
+            }
+            my $xml = XML::Simple::XMLin($res->decoded_content);
+
+            $format->{video_id} = $video_id;
+            $format->{title}    = $xml->{thumb}{title};
+            $format->{ext}      = $xml->{thumb}{movie_type};
         };
 
         # Check --overwrite.
@@ -108,7 +114,7 @@ sub download_video {
             return;
         }
 
-        # Make parent directory of saving .flv file.
+        # Make parent directory of saving movie file.
         mkpath $file_path;
         unless (-d $file_path) {
             warn "skipping '$video'... can't create directory '$file_path'.\n";
@@ -266,7 +272,7 @@ my $password;
 my $opt = {
     progress        => 1,
     overwrite       => 0,
-    filename_format => '${title}.flv',
+    filename_format => '${title}.${ext}',
 };
 GetOptions(
     'h'                 => sub { usage(1) },
@@ -395,7 +401,7 @@ Show progress while downloading.
 
 Default behavior is that
 if there is already a file
-on the path of saving .flv file, skip it.
+on the path of saving movie file, skip it.
 but overwrite it if you specify this C<--overwrite> option.
 
 =item -q, --quiet
