@@ -1,8 +1,7 @@
 #!/usr/bin/env perl
-use common::sense;
-# use strict;
-# use warnings;
-# use utf8;
+use strict;
+use warnings;
+use utf8;
 
 # gnu_compat: --opt="..." is allowed.
 # no_bundling: single character option is not bundled.
