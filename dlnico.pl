@@ -90,11 +90,18 @@ sub download_video {
         };
         debug 2, "video ID = $video_id";
 
+        # Get $format->{title} .
+        my $format = {video_id => $video_id};
+        $format->{title} = do {
+            my $URL = "http://ext.nicovideo.jp/api/getthumbinfo/$video_id";
+            require XML::Simple;
+            require LWP::Simple;
+            my $xml = XML::Simple::XMLin(LWP::Simple::get($URL));
+            $xml->{thumb}{title};
+        };
+
         # Check --overwrite.
-        my $filename = format_string($opt->{filename_format}, {
-            video_id => $video_id,
-            # TODO: more keys
-        });
+        my $filename = format_string($opt->{filename_format}, $format);
         $filename = catfile $file_path, $filename;
         if (!$opt->{overwrite} && -e $filename) {
             warn "skipping '$video'... path '$filename' exists.\n";
@@ -259,7 +266,7 @@ my $password;
 my $opt = {
     progress        => 1,
     overwrite       => 0,
-    filename_format => '${video_id}.flv',
+    filename_format => '${title}.flv',
 };
 GetOptions(
     'h'                 => sub { usage(1) },
