@@ -83,41 +83,40 @@ sub download_video {
 
     debug 1, "downloading video '$video'...";
 
-    my @download_args = do {
-        # Get video ID.
-        my $video_id = get_video_id($video) // do {
-            warn "skipping '$video'... can't find video ID.\n";
-            return;
-        };
-        debug 2, "video ID = $video_id";
-
-        # Get and store info in $format.
-        my $format = fetch_meta_data($video_id);
-
-        # Check --overwrite.
-        my $filename = format_string($opt->{filename_format}, $format);
-        $filename = catfile $file_path, $filename;
-        if (!$opt->{overwrite} && -e $filename) {
-            warn "skipping '$video'... path '$filename' exists.\n";
-            return;
-        }
-
-        # Make parent directory of saving movie file.
-        mkpath $file_path;
-        unless (-d $file_path) {
-            warn "skipping '$video'... can't create directory '$file_path'.\n";
-            return;
-        }
-
-        # Build arguments for $NICOVIDEO->download().
-        if ($opt->{progress}) {
-            my $callback = make_progressbar_callback($filename, $video, $format->{title});
-            ($video_id, $callback);
-        }
-        else {
-            ($video_id, $filename);
-        }
+    # Get video ID.
+    my $video_id = get_video_id($video) // do {
+        warn "skipping '$video'... can't find video ID.\n";
+        return;
     };
+    debug 2, "video ID = $video_id";
+
+    # Get and store info in $format.
+    my $format = fetch_meta_data($video_id);
+
+    # Check --overwrite.
+    my $filename = format_string($opt->{filename_format}, $format);
+    $filename = catfile $file_path, $filename;
+    if (!$opt->{overwrite} && -e $filename) {
+        warn "skipping '$video'... path '$filename' exists.\n";
+        return;
+    }
+
+    # Make parent directory of saving movie file.
+    mkpath $file_path;
+    unless (-d $file_path) {
+        warn "skipping '$video'... can't create directory '$file_path'.\n";
+        return;
+    }
+
+    # Build arguments for $NICOVIDEO->download().
+    my @download_args;
+    if ($opt->{progress}) {
+        my $callback = make_progressbar_callback($filename, $video, $format->{title});
+        @download_args = ($video_id, $callback);
+    }
+    else {
+        @download_args = ($video_id, $filename);
+    }
 
     eval { $NICOVIDEO->download(@download_args) };
     print "\n";    # go to next line of progressbar.
