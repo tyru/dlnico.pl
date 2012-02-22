@@ -12,6 +12,7 @@ use Pod::Usage;
 use WWW::NicoVideo::Download;
 use URI;
 use XML::Feed;
+use XML::Simple ();
 use File::Spec::Functions qw(catfile);
 use File::Path qw(mkpath);
 
@@ -93,7 +94,6 @@ sub download_video {
         # Get and store info in $format.
         my $format = {};
         do {
-            require XML::Simple;
             my $URL = "http://ext.nicovideo.jp/api/getthumbinfo/$video_id";
             my $res = $NICOVIDEO->user_agent->get($URL);
             unless ($res->is_success) {
