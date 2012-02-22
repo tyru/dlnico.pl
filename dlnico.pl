@@ -272,7 +272,7 @@ my $password;
 my $opt = {
     progress        => 1,
     overwrite       => 0,
-    filename_format => '${title}.${ext}',
+    filename_format => '${video_id}.${ext}',
 };
 GetOptions(
     'h'                 => sub { usage(1) },
