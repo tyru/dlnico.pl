@@ -92,19 +92,8 @@ sub download_video {
         debug 2, "video ID = $video_id";
 
         # Get and store info in $format.
-        my $format = {};
-        do {
-            my $URL = "http://ext.nicovideo.jp/api/getthumbinfo/$video_id";
-            my $res = $NICOVIDEO->user_agent->get($URL);
-            unless ($res->is_success) {
-                die "Can't fetch meta data: ".$res->status_line;
-            }
-            my $xml = XML::Simple::XMLin($res->decoded_content);
-
-            $format->{video_id} = $video_id;
-            $format->{title}    = $xml->{thumb}{title};
-            $format->{ext}      = $xml->{thumb}{movie_type};
-        };
+        my $format = fetch_meta_data($video_id);
+        $format->{video_id} = $video_id;
 
         # Check --overwrite.
         my $filename = format_string($opt->{filename_format}, $format);
@@ -171,6 +160,25 @@ sub download_video {
     else {
         debug 1, "downloading video '$video'...done!";
     }
+}
+
+# Get and store info from *video ID*.
+sub fetch_meta_data {
+    my ($video_id) = @_;
+
+    # Fetch meta data using getthumbinfo API.
+    my $URL = "http://ext.nicovideo.jp/api/getthumbinfo/$video_id";
+    my $res = $NICOVIDEO->user_agent->get($URL);
+    unless ($res->is_success) {
+        die "Can't fetch meta data: ".$res->status_line;
+    }
+    my $xml = XML::Simple::XMLin($res->decoded_content);
+
+    return {
+        video_id => $video_id,
+        title    => $xml->{thumb}{title},
+        ext      => $xml->{thumb}{movie_type},
+    };
 }
 
 # Download *mylist*.
