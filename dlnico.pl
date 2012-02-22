@@ -136,15 +136,15 @@ sub download_video {
 
                 # Build progress string.
                 my $size = tell $wfh;
-                my $str;
+                my $str = $format->{title}." ";
                 if (my $total = $res->header('Content-Length')) {
-                    $str = sprintf "%s/%s (%.5f%%)",
+                    $str .= sprintf "%s/%s (%.5f%%)",
                             readable_size($size),
                             readable_size($total),
                             $size/$total*100;
                 }
                 else {
-                    $str = sprintf "%s/Unknown bytes",
+                    $str .= sprintf "%s/Unknown bytes",
                             readable_size($size);
                 }
 
