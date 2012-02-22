@@ -93,7 +93,6 @@ sub download_video {
 
         # Get and store info in $format.
         my $format = fetch_meta_data($video_id);
-        $format->{video_id} = $video_id;
 
         # Check --overwrite.
         my $filename = format_string($opt->{filename_format}, $format);
@@ -112,39 +111,7 @@ sub download_video {
 
         # Build arguments for $NICOVIDEO->download().
         if ($opt->{progress}) {
-            my $wfh = IO::File->new($filename, 'w') or do {
-                warn "skipping '$video'... can't open '$filename' for writing.\n";
-                return;
-            };
-            binmode $wfh;
-            my $prev_disp; # updated continually in $callback.
-            my $callback = sub {
-                my ($chunk, $res, $proto) = @_;
-
-                print $wfh $chunk;
-
-                # Build progress string.
-                my $size = tell $wfh;
-                my $str = $format->{title}." ";
-                if (my $total = $res->header('Content-Length')) {
-                    $str .= sprintf "%s/%s (%.5f%%)",
-                            readable_size($size),
-                            readable_size($total),
-                            $size/$total*100;
-                }
-                else {
-                    $str .= sprintf "%s/Unknown bytes",
-                            readable_size($size);
-                }
-
-                # Output progress.
-                print "\r$str";
-                my $disp = length $str;
-                if (defined $prev_disp && $prev_disp > $disp) {
-                    print ' ' x ($prev_disp - $disp);
-                }
-                $prev_disp = $disp;
-            };
+            my $callback = make_progressbar_callback($filename, $video, $format->{title});
             ($video_id, $callback);
         }
         else {
@@ -178,6 +145,47 @@ sub fetch_meta_data {
         video_id => $video_id,
         title    => $xml->{thumb}{title},
         ext      => $xml->{thumb}{movie_type},
+    };
+}
+
+# Make callback for WWW::NicoVideo::Download::download().
+# This subroutine is called only unless --no-progressbar was given.
+sub make_progressbar_callback {
+    my ($filename, $video, $title) = @_;
+
+    my $wfh = IO::File->new($filename, 'w') or do {
+        warn "skipping '$video'... can't open '$filename' for writing.\n";
+        return;
+    };
+    binmode $wfh;
+
+    my $prev_disp; # updated continually in $callback.
+    return sub {
+        my ($chunk, $res, $proto) = @_;
+
+        print $wfh $chunk;
+
+        # Build progress string.
+        my $size = tell $wfh;
+        my $str = "$title ";
+        if (my $total = $res->header('Content-Length')) {
+            $str .= sprintf "%s/%s (%.5f%%)",
+                    readable_size($size),
+                    readable_size($total),
+                    $size/$total*100;
+        }
+        else {
+            $str .= sprintf "%s/Unknown bytes",
+                    readable_size($size);
+        }
+
+        # Output progress.
+        print "\r$str";
+        my $disp = length $str;
+        if (defined $prev_disp && $prev_disp > $disp) {
+            print ' ' x ($prev_disp - $disp);
+        }
+        $prev_disp = $disp;
     };
 }
 
