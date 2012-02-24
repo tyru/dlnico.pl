@@ -83,85 +83,40 @@ sub download_video {
 
     debug 1, "downloading video '$video'...";
 
-    my @download_args = do {
-        # Get video ID.
-        my $video_id = get_video_id($video) // do {
-            warn "skipping '$video'... can't find video ID.\n";
-            return;
-        };
-        debug 2, "video ID = $video_id";
-
-        # Get and store info in $format.
-        my $format = {};
-        do {
-            my $URL = "http://ext.nicovideo.jp/api/getthumbinfo/$video_id";
-            my $res = $NICOVIDEO->user_agent->get($URL);
-            unless ($res->is_success) {
-                die "Can't fetch meta data: ".$res->status_line;
-            }
-            my $xml = XML::Simple::XMLin($res->decoded_content);
-
-            $format->{video_id} = $video_id;
-            $format->{title}    = $xml->{thumb}{title};
-            $format->{ext}      = $xml->{thumb}{movie_type};
-        };
-
-        # Check --overwrite.
-        my $filename = format_string($opt->{filename_format}, $format);
-        $filename = catfile $file_path, $filename;
-        if (!$opt->{overwrite} && -e $filename) {
-            warn "skipping '$video'... path '$filename' exists.\n";
-            return;
-        }
-
-        # Make parent directory of saving movie file.
-        mkpath $file_path;
-        unless (-d $file_path) {
-            warn "skipping '$video'... can't create directory '$file_path'.\n";
-            return;
-        }
-
-        # Build arguments for $NICOVIDEO->download().
-        if ($opt->{progress}) {
-            my $wfh = IO::File->new($filename, 'w') or do {
-                warn "skipping '$video'... can't open '$filename' for writing.\n";
-                return;
-            };
-            binmode $wfh;
-            my $prev_disp; # updated continually in $callback.
-            my $callback = sub {
-                my ($chunk, $res, $proto) = @_;
-
-                print $wfh $chunk;
-
-                # Build progress string.
-                my $size = tell $wfh;
-                my $str = $format->{title}." ";
-                if (my $total = $res->header('Content-Length')) {
-                    $str .= sprintf "%s/%s (%.5f%%)",
-                            readable_size($size),
-                            readable_size($total),
-                            $size/$total*100;
-                }
-                else {
-                    $str .= sprintf "%s/Unknown bytes",
-                            readable_size($size);
-                }
-
-                # Output progress.
-                print "\r$str";
-                my $disp = length $str;
-                if (defined $prev_disp && $prev_disp > $disp) {
-                    print ' ' x ($prev_disp - $disp);
-                }
-                $prev_disp = $disp;
-            };
-            ($video_id, $callback);
-        }
-        else {
-            ($video_id, $filename);
-        }
+    # Get video ID.
+    my $video_id = get_video_id($video) // do {
+        warn "skipping '$video'... can't find video ID.\n";
+        return;
     };
+    debug 2, "video ID = $video_id";
+
+    # Get and store info in $format.
+    my $format = fetch_meta_data($video_id);
+
+    # Check --overwrite.
+    my $filename = format_string($opt->{filename_format}, $format);
+    $filename = catfile $file_path, $filename;
+    if (!$opt->{overwrite} && -e $filename) {
+        warn "skipping '$video'... path '$filename' exists.\n";
+        return;
+    }
+
+    # Make parent directory of saving movie file.
+    mkpath $file_path;
+    unless (-d $file_path) {
+        warn "skipping '$video'... can't create directory '$file_path'.\n";
+        return;
+    }
+
+    # Build arguments for $NICOVIDEO->download().
+    my @download_args;
+    if ($opt->{progress}) {
+        my $callback = make_progressbar_callback($filename, $video, $format->{title});
+        @download_args = ($video_id, $callback);
+    }
+    else {
+        @download_args = ($video_id, $filename);
+    }
 
     eval { $NICOVIDEO->download(@download_args) };
     print "\n";    # go to next line of progressbar.
@@ -171,6 +126,66 @@ sub download_video {
     else {
         debug 1, "downloading video '$video'...done!";
     }
+}
+
+# Get and store info from *video ID*.
+sub fetch_meta_data {
+    my ($video_id) = @_;
+
+    # Fetch meta data using getthumbinfo API.
+    my $URL = "http://ext.nicovideo.jp/api/getthumbinfo/$video_id";
+    my $res = $NICOVIDEO->user_agent->get($URL);
+    unless ($res->is_success) {
+        die "Can't fetch meta data: ".$res->status_line;
+    }
+    my $xml = XML::Simple::XMLin($res->decoded_content);
+
+    return {
+        video_id => $video_id,
+        title    => $xml->{thumb}{title},
+        ext      => $xml->{thumb}{movie_type},
+    };
+}
+
+# Make callback for WWW::NicoVideo::Download::download().
+# This subroutine is called only unless --no-progressbar was given.
+sub make_progressbar_callback {
+    my ($filename, $video, $title) = @_;
+
+    my $wfh = IO::File->new($filename, 'w') or do {
+        warn "skipping '$video'... can't open '$filename' for writing.\n";
+        return;
+    };
+    binmode $wfh;
+
+    my $prev_disp; # updated continually in $callback.
+    return sub {
+        my ($chunk, $res, $proto) = @_;
+
+        print $wfh $chunk;
+
+        # Build progress string.
+        my $size = tell $wfh;
+        my $str = "$title ";
+        if (my $total = $res->header('Content-Length')) {
+            $str .= sprintf "%s/%s (%.5f%%)",
+                    readable_size($size),
+                    readable_size($total),
+                    $size/$total*100;
+        }
+        else {
+            $str .= sprintf "%s/Unknown bytes",
+                    readable_size($size);
+        }
+
+        # Output progress.
+        print "\r$str";
+        my $disp = length $str;
+        if (defined $prev_disp && $prev_disp > $disp) {
+            print ' ' x ($prev_disp - $disp);
+        }
+        $prev_disp = $disp;
+    };
 }
 
 # Download *mylist*.
