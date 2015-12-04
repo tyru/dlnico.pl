@@ -36,7 +36,7 @@ sub debug {
 
 sub format_string {
     my ($format, $opt) = @_;
-    $format =~ s[ (\${(\w+)}) ][ $opt->{$2} // $1 ]gex;
+    $format =~ s[ (\$\{(\w+)\}) ][ $opt->{$2} // $1 ]gex;
     return $format;
 }
 
