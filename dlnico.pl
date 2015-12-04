@@ -20,7 +20,7 @@ use File::Path qw(mkpath);
 my $NICOVIDEO;
 my $DEBUG_LEVEL = 1;
 
-my $VIDEO_ID  = qr/\A[sn]m\d+\Z/;
+my $VIDEO_ID  = qr/\A[a-z]{2}\d+\Z/;
 my $MYLIST_ID = qr/\A\d+\Z/;
 
 
