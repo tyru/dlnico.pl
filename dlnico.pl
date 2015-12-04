@@ -316,7 +316,10 @@ if (!defined $email || !defined $password) {
     }
 }
 if (!defined $email || !defined $password) {
-    die "--email and --password are required.\n";
+    warn "--email and --password are required.\n";
+    warn "\n";
+    warn "You can use config file if you installed Config::Pit module.\n";
+    exit -1;
 }
 
 ### Initialize $NICOVIDEO.
