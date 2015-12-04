@@ -1,3 +1,9 @@
+on configure => sub {
+    requires 'Module::Build' => 0.4003;
+    requires 'Module::Build::Pluggable';
+    requires 'Module::Build::Pluggable::CPANfile';
+};
+
 requires 'WWW::NicoVideo::Download', '0.06';
 requires 'LWP::Protocol::https', '6.06';
 requires 'URI', '1.69';
