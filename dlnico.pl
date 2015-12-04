@@ -10,6 +10,7 @@ use utf8;
 use Getopt::Long qw(:config gnu_compat no_bundling no_ignore_case);
 use Pod::Usage qw(pod2usage);
 use WWW::NicoVideo::Download;
+use LWP::Protocol::https;   # Raise error at compile-time. (because LWP dynamically loads it)
 use URI;
 use XML::Feed;
 use XML::Simple ();
