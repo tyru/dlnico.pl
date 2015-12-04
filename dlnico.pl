@@ -16,6 +16,7 @@ use XML::Feed;
 use XML::Simple ();
 use File::Spec::Functions qw(catfile);
 use File::Path qw(mkpath);
+use Term::ProgressBar;
 
 
 my $NICOVIDEO;
@@ -159,33 +160,12 @@ sub make_progressbar_callback {
     };
     binmode $wfh;
 
-    my $prev_disp; # updated continually in $callback.
+    my $term;
     return sub {
-        my ($chunk, $res, $proto) = @_;
-
-        print $wfh $chunk;
-
-        # Build progress string.
-        my $size = tell $wfh;
-        my $str = "$title ";
-        if (my $total = $res->header('Content-Length')) {
-            $str .= sprintf "%s/%s (%.5f%%)",
-                    readable_size($size),
-                    readable_size($total),
-                    $size/$total*100;
-        }
-        else {
-            $str .= sprintf "%s/Unknown bytes",
-                    readable_size($size);
-        }
-
-        # Output progress.
-        print "\r$str";
-        my $disp = length $str;
-        if (defined $prev_disp && $prev_disp > $disp) {
-            print ' ' x ($prev_disp - $disp);
-        }
-        $prev_disp = $disp;
+        my($data, $res, $proto) = @_;
+        $term ||= Term::ProgressBar->new($res->header('Content-Length'));
+        $term->update($term->last_update + length $data);
+        print $wfh $data;
     };
 }
 
