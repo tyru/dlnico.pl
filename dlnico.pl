@@ -83,8 +83,6 @@ sub readable_size {
 sub download_video {
     my ($video, $file_path, $opt) = @_;
 
-    debug 1, "downloading video '$video'...";
-
     # Get video ID.
     my $video_id = get_video_id($video) // do {
         warn "skipping '$video'... can't find video ID.\n";
@@ -102,6 +100,8 @@ sub download_video {
         warn "skipping '$video'... path '$filename' exists.\n";
         return;
     }
+
+    debug 1, "downloading video '$filename'...";
 
     # Make parent directory of saving movie file.
     mkpath $file_path;
@@ -126,7 +126,7 @@ sub download_video {
         warn "$@\n";
     }
     else {
-        debug 1, "downloading video '$video'...done!";
+        debug 1, "downloading video '$filename'...done!";
     }
 }
 
