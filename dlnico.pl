@@ -341,7 +341,7 @@ __END__
     dlnico.pl - NicoVideo downloader
 
 
-=head1 USAGE
+=head1 SYNOPSIS
 
     $ dlnico.pl {video or mylist} [{saved directory}]
 
@@ -355,8 +355,6 @@ __END__
         the directory where downloaded video(s) are saved.
         default value is "." (current directory) .
 
-
-=head1 SYNOPSIS
 
     $ dlnico.pl http://www.nicovideo.jp/mylist/22370493  # download all videos in mylist
     $ dlnico.pl 22370493                                 # same as above
