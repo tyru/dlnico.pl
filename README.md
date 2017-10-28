@@ -28,8 +28,6 @@
 Install Carton and cpanminus under `~/perl5`.
 
     $ cat ~/.bash_profile
-    (省略)
-    
     mkdir -p $HOME/perl5
     [ "$PERL5LIB" ] && export PERL5LIB="$HOME/perl5/lib/perl5:$PERL5LIB" || export PERL5LIB="$HOME/perl5/lib/perl5"
     [ "$PATH" ] && export PATH="$HOME/perl5/bin:$PATH" || export PATH="$HOME/perl5/bin"
