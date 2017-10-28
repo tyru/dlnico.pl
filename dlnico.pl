@@ -36,9 +36,10 @@ sub debug {
     print @_, "\n" if $level <= $DEBUG_LEVEL;
 }
 
-sub format_string {
+sub build_filename {
     my ($format, $opt) = @_;
-    $format =~ s[ (\$\{(\w+)\}) ][ $opt->{$2} // $1 ]gex;
+    $format =~ s{ (\$\{(\w+)\}) }{ $opt->{$2} // $1 }gex;
+    $format =~ s{[/\\]}{_}gx;
     return $format;
 }
 
@@ -94,7 +95,7 @@ sub download_video {
     my $format = fetch_meta_data($video_id);
 
     # Check --overwrite.
-    my $filename = format_string($opt->{filename_format}, $format);
+    my $filename = build_filename($opt->{filename_format}, $format);
     $filename = catfile $file_path, $filename;
     if (!$opt->{overwrite} && -e $filename) {
         warn "skipping '$video'... path '$filename' exists.\n";
