@@ -22,7 +22,7 @@ use Term::ProgressBar;
 my $NICOVIDEO;
 my $DEBUG_LEVEL = 1;
 
-my $VIDEO_ID  = qr/\A[a-z]{2}\d+\Z/;
+my $VIDEO_ID  = qr/\A[a-z0-9]+\Z/;
 my $MYLIST_ID = qr/\A\d+\Z/;
 
 
